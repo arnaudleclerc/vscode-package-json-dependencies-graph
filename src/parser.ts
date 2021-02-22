@@ -16,7 +16,7 @@ interface DependencyLink {
 
 interface Dependency {
     version: string;
-    dependencies: { [name: string]: Dependency }[];
+    dependencies: { [name: string]: Dependency };
 }
 
 interface DependencyRoot extends Dependency {
@@ -31,23 +31,19 @@ export class DependenciesParser {
     private static readonly _width: number = 300;
     private static readonly _height: number = 300;
 
-    public static parse(dependencyRoot: DependencyRoot): void {
+    public static parse(dependencyRoot: DependencyRoot): { nodes: DependencyNode[], links: DependencyLink[] } {
         this._nodes.push({ id: dependencyRoot.name, group: 1 });
 
+        const readPkg = dependencyRoot.dependencies['read-pkg' as any];
         Logger.info('Flattening dependencies');
         this.flattenDependencies(dependencyRoot, dependencyRoot.name);
 
-        Logger.info(JSON.stringify(this._nodes));
-        Logger.info(JSON.stringify(this._links));
-
-        Logger.info('Generating graph');
-        this.generateGraph();
-
-        Logger.info('Graph generated');
+        return { nodes: this._nodes, links: this._links };
     }
 
     private static flattenDependencies(dependency: Dependency, source: string): void {
         for (const name in dependency.dependencies) {
+            Logger.info(`Analying dependency ${name} of ${source}`);
             const nodeIndex = this._nodes.findIndex(value => value.id === name);
             if (nodeIndex === -1) {
                 this._nodes.push({ group: 1, id: name });
@@ -62,12 +58,7 @@ export class DependenciesParser {
                 this._links[linkIndex].value++;
             }
 
-            const nextLevelDependencies = dependency.dependencies[name];
-
-            for (const nextLevelDependency in nextLevelDependencies) {
-                Logger.info(`Flattening dependencies for ${name}`);
-                this.flattenDependencies(nextLevelDependencies[nextLevelDependency], name);
-            }
+            this.flattenDependencies(dependency.dependencies[name], name);
         }
     }
 
