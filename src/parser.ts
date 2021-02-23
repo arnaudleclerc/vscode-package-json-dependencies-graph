@@ -42,13 +42,13 @@ export class DependenciesParser {
         }
 
         for (const name in dependencyRoot.dependencies) {
-            this.processDependency(name, dependencyRoot.dependencies[name], result, 3);
+            this.processDependency(name, dependencyRoot.dependencies[name], result, 3, dependencyRoot);
         }
 
         return result;
     }
 
-    private static processDependency(name: string, dependency: Dependency, graph: { nodes: DependencyNode[], links: DependencyLink[] }, depth: number): void {
+    private static processDependency(name: string, dependency: Dependency, graph: { nodes: DependencyNode[], links: DependencyLink[] }, depth: number, dependencyRoot: DependencyRoot): void {
         if (graph.nodes.findIndex(dep => dep.id === name) === -1) {
             graph.nodes.push({ id: name, group: depth });
         }
@@ -56,13 +56,14 @@ export class DependenciesParser {
         for (const dep in dependency.dependencies) {
             if (graph.links.findIndex(link => link.source === name && link.target === dep) === -1) {
                 graph.links.push({ source: name, target: dep, value: 1 });
-                this.processDependency(dep, dependency.dependencies[dep], graph, depth + 1);
+                this.processDependency(dep, dependency.dependencies[dep], graph, depth + 1, dependencyRoot);
             }
         }
 
         for (const dep in dependency.requires) {
             if (graph.links.findIndex(link => link.source === name && link.target === dep) === -1) {
                 graph.links.push({ source: name, target: dep, value: 1 });
+                this.processDependency(dep, dependencyRoot.dependencies[dep], graph, depth + 1, dependencyRoot);
             }
         }
     }
