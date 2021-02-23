@@ -45,7 +45,7 @@
             .attr("r", 5)
             .attr("fill", d => {
                 const scale = d3.scaleOrdinal(d3.schemeCategory10);
-                return d => scale(d.group);
+                return scale(d.group);
             });
 
         node.append("title")

@@ -28,12 +28,11 @@ export function activate(context: vscode.ExtensionContext) {
 					const panel = vscode.window.createWebviewPanel(
 						'dependencyGraph', // Identifies the type of the webview. Used internally
 						'Dependency Graph', // Title of the panel displayed to the user
-						vscode.ViewColumn.Beside, // Editor column to show the new webview panel in.
+						vscode.ViewColumn.Two, // Editor column to show the new webview panel in.
 						{
 							enableScripts: true
 						} // Webview options. More on these later.
 					);
-
 
 					const result = DependenciesParser.parse(JSON.parse(data.toString()));
 
@@ -79,23 +78,26 @@ function getWebviewContent(nodes: string, links: string, d3Src: vscode.Uri, d3Fo
 	  <meta charset="UTF-8">
 	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	  <title>Cat Coding</title>
-	  <script src="${d3Src}" />
-	  <script src="${d3ForceSrc}" />
+	  <script src="${d3Src}"></script>
+	  <script src="${d3ForceSrc}"></script>
   </head>
-  <body>
+  <body style="background-color:'#fff'">
 	<div id="dependencyGraphContainer">
 	<script>
-	const nodes = JSON.parse(${nodes});
-	const links = JSON.parse(${links});
+	const nodes = ${nodes};
+	const links = ${links};
+	const width = 1200;
+	const height = 1200;
+
 	const simulation = d3.forceSimulation(nodes)
-		.force('link', d3.forceLink(links).id(d => d.id))
+		.force("link", d3.forceLink(links).id(d => d.id))
 		.force("charge", d3.forceManyBody())
-		.force("center", d3.forceCenter(300 / 2, 300 / 2));
+		.force("center", d3.forceCenter(width / 2, height / 2));
 
 	const svg = d3.select('#dependencyGraphContainer')
 		.append('svg')
-		.attr("width", 300)
-		.attr('height', 300);
+		.attr("width", width)
+		.attr('height', height);
 
 	const link = svg.append("g")
 		.attr("stroke", "#999")
@@ -111,9 +113,11 @@ function getWebviewContent(nodes: string, links: string, d3Src: vscode.Uri, d3Fo
 		.selectAll("circle")
 		.data(nodes)
 		.join("circle")
-		.attr("r", 5);
-	// .attr("fill", color)
-	// .call(drag());
+		.attr("r", 5)
+		.attr("fill", d => {
+			const scale = d3.scaleOrdinal(d3.schemeCategory10);
+			return scale(d.group);
+		});
 
 	node.append("title")
 		.text(d => d.id);
@@ -122,8 +126,8 @@ function getWebviewContent(nodes: string, links: string, d3Src: vscode.Uri, d3Fo
 		link
 			.attr("x1", d => d.source.x)
 			.attr("y1", d => d.source.y)
-			.attr("x2", d => d.source.x)
-			.attr("y2", d => d.source.y);
+			.attr("x2", d => d.target.x)
+			.attr("y2", d => d.target.y);
 
 		node
 			.attr("cx", d => d.x)
