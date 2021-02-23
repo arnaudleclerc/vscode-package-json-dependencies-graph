@@ -87,13 +87,18 @@ function getWebviewContent(nodes: string, links: string, d3Src: vscode.Uri, d3Fo
   </head>
   <body>
 	<select id="packages"></select>
+	<select id="direction" disabled>
+		<option value='both' selected=true>Both ways</options>
+		<option value='target'>Is target</options>
+		<option value='source'>Is source</options>
+	</select>
 	<div id="dependencyGraphContainer">
 	<script>
 
 	const nodes = ${nodes};
 	const links = ${links};
 
-	function generateGraph(selectedPackage) {
+	function generateGraph(selectedPackage, direction) {
 
 		const svgContainer = document.getElementById('dependencyGraphContainerSvg');
 		if(svgContainer) {
@@ -103,7 +108,7 @@ function getWebviewContent(nodes: string, links: string, d3Src: vscode.Uri, d3Fo
 		const width = 1200;
 		const height = 1200;
 
-		const filteredLinks = selectedPackage ? links.filter(link => link.source.id === selectedPackage || link.target.id === selectedPackage) : links;
+		const filteredLinks = selectedPackage ? links.filter(link => ((direction === 'both' || direction === 'source') && link.source.id === selectedPackage) || ((direction === 'both' || direction === 'target') && link.target.id === selectedPackage)) : links;
 		const filteredNodes = selectedPackage ? nodes.filter(node => node.id === selectedPackage || filteredLinks.findIndex(value => value.source.id === node.id || value.target.id === node.id) > -1) : nodes;
 
 		const scale = d3.scaleOrdinal(d3.schemeCategory10);
@@ -165,8 +170,19 @@ function getWebviewContent(nodes: string, links: string, d3Src: vscode.Uri, d3Fo
 		packagesSelect.appendChild(option);
 	}
 
+	const direction = document.getElementById('direction');
+
 	packagesSelect.addEventListener('change', () => {
-		generateGraph(packagesSelect.value);
+		if(!packagesSelect.value) {
+			direction.setAttribute('disabled', 'disabled');
+		} else {
+			direction.removeAttribute('disabled');
+		}
+		generateGraph(packagesSelect.value, direction.value);
+	});
+
+	direction.addEventListener('change', () => {
+		generateGraph(packagesSelect.value, direction.value);5
 	});
 
 	generateGraph(null);
