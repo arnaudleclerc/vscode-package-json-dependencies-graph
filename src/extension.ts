@@ -144,7 +144,7 @@ function getWebviewContent(nodes: string, links: string, d3Src: vscode.Uri, d3Fo
 			});
 	
 		node.append("title")
-			.text(d => d.id);
+			.text(d => d.id + " - depth : " + d.group);
 	
 		simulation.on("tick", () => {
 			link
