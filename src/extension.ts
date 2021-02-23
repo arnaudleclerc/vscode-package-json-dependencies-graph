@@ -163,7 +163,8 @@ function getWebviewContent(nodes: string, links: string, d3Src: vscode.Uri, d3Fo
 	const defaultOption = document.createElement('option');
 	defaultOption.text = '';
 	packagesSelect.appendChild(defaultOption);
-	for (const node of nodes) {
+	console.log(nodes.sort((a, b) => { return a.id < b.id ? -1 : 1; }));
+	for (const node of nodes.sort((a, b) => { return a.id - b.id; })) {
 		const option = document.createElement('option');
 		option.text = node.id;
 		option.value = node.id;

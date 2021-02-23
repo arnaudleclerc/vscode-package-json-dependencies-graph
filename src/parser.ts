@@ -31,17 +31,21 @@ export class DependenciesParser {
         const result: { nodes: DependencyNode[], links: DependencyLink[] } = { nodes: [], links: [] };
         result.nodes.push({ id: packageRoot.name, group: 1 });
 
+        const allDependencies: string[] = [];
+
         for (const name in packageRoot.dependencies) {
             result.nodes.push({ id: name, group: 2 });
             result.links.push({ source: packageRoot.name, target: name, value: 1 });
+            allDependencies.push(name);
         }
 
         for (const name in packageRoot.devDependencies) {
             result.nodes.push({ id: name, group: 2 });
             result.links.push({ source: packageRoot.name, target: name, value: 1 });
+            allDependencies.push(name);
         }
 
-        for (const name in dependencyRoot.dependencies) {
+        for (const name of allDependencies) {
             this.processDependency(name, dependencyRoot.dependencies[name], result, 3, dependencyRoot);
         }
 
@@ -49,7 +53,8 @@ export class DependenciesParser {
     }
 
     private static processDependency(name: string, dependency: Dependency, graph: { nodes: DependencyNode[], links: DependencyLink[] }, depth: number, dependencyRoot: DependencyRoot): void {
-        if (graph.nodes.findIndex(dep => dep.id === name) === -1) {
+        const nodeIndex = graph.nodes.findIndex(dep => dep.id === name);
+        if (nodeIndex === -1) {
             graph.nodes.push({ id: name, group: depth });
         }
 
