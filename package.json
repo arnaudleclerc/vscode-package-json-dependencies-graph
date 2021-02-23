@@ -1,6 +1,6 @@
 {
-	"name": "vscode-package-json-dependencies-graph",
-	"displayName": "package-json-dependencies-graph",
+	"name": "vscode-npm-packages-graph",
+	"displayName": "npm-packages-graph",
 	"description": "Visualise the dependencies on your package.json on a graph",
 	"version": "0.0.1",
 	"engines": {
@@ -10,13 +10,13 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:vscode-package-json-dependencies-graph.parse"
+		"onCommand:vscode-npm-packages-graph.parse"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "vscode-package-json-dependencies-graph.parse",
+				"command": "vscode-npm-packages-graph.parse",
 				"title": "Generate graph for package.json"
 			}
 		]
